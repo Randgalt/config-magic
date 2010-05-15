@@ -92,6 +92,9 @@ public class ConfigurationObjectFactory
         }
 
         if (value != null) {
+            if ( mappedReplacements != null ) {
+                value = applyReplacements(value, mappedReplacements);
+            }
             final Object finalValue = bully.coerce(method.getReturnType(), value);
             callbacks.add(new FixedValue() {
                 public Object loadObject() throws Exception {
@@ -109,13 +112,13 @@ public class ConfigurationObjectFactory
         }
     }
 
-    private String applyReplacements(String propertyName, Map<String, String> mappedReplacements) {
+    private String applyReplacements(String baseName, Map<String, String> mappedReplacements) {
         for ( String key : mappedReplacements.keySet() ) {
             String token = makeToken(key);
             String replacement = mappedReplacements.get(key);
-            propertyName = propertyName.replace(token, replacement);
+            baseName = baseName.replace(token, replacement);
         }
-        return propertyName;
+        return baseName;
     }
 
     private void buildParameterized(ArrayList<Callback> callbacks, Method method, Config annotation) {

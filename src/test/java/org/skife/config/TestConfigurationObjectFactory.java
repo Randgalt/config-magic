@@ -15,7 +15,40 @@ import static org.junit.Assert.fail;
 public class TestConfigurationObjectFactory
 {
     @Test
-    public void testMultipleReplacements() throws Exception {
+    public void testMultiplePCompleteReplacements() throws Exception {
+        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
+            setProperty("another-option.a.1", "${type}${s}");
+            setProperty("another-option.a.2", "${type}${s}");
+            setProperty("another-option.b.1", "${type}${s}");
+            setProperty("another-option.b.2", "${type}${s}");
+        }});
+
+        ReplacementConfig1 r;
+        Map<String, String> replacementsMap = new HashMap<String, String>();
+
+        replacementsMap.put("type", "a");
+        replacementsMap.put("s", "1");
+        r = c.buildWithReplacements(ReplacementConfig1.class, replacementsMap);
+        assertEquals(r.getStringOption2Types(), "a1");
+
+        replacementsMap.put("type", "a");
+        replacementsMap.put("s", "2");
+        r = c.buildWithReplacements(ReplacementConfig1.class, replacementsMap);
+        assertEquals(r.getStringOption2Types(), "a2");
+
+        replacementsMap.put("type", "b");
+        replacementsMap.put("s", "1");
+        r = c.buildWithReplacements(ReplacementConfig1.class, replacementsMap);
+        assertEquals(r.getStringOption2Types(), "b1");
+
+        replacementsMap.put("type", "b");
+        replacementsMap.put("s", "2");
+        r = c.buildWithReplacements(ReplacementConfig1.class, replacementsMap);
+        assertEquals(r.getStringOption2Types(), "b2");
+    }
+
+    @Test
+    public void testMultiplePropertyNameReplacements() throws Exception {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
             setProperty("another-option.a.1", "A1");
             setProperty("another-option.a.2", "A2");
@@ -48,7 +81,23 @@ public class TestConfigurationObjectFactory
     }
 
     @Test
-    public void testReplacement() throws Exception {
+    public void testCompleteReplacement() throws Exception {
+        Map<String, String> replacementsMap = new HashMap<String, String>();
+        replacementsMap.put("type", "first");
+        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
+            setProperty("option.first", "/parent/${type}");
+            setProperty("option.second", "/parent/${type}");
+        }});
+        ReplacementConfig1 r = c.buildWithReplacements(ReplacementConfig1.class, replacementsMap);
+        assertEquals(r.getStringOption(), "/parent/first");
+
+        replacementsMap.put("type", "second");
+        r = c.buildWithReplacements(ReplacementConfig1.class, replacementsMap);
+        assertEquals(r.getStringOption(), "/parent/second");
+    }
+
+    @Test
+    public void testPropertyNameReplacement() throws Exception {
         Map<String, String> replacementsMap = new HashMap<String, String>();
         replacementsMap.put("type", "first");
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
